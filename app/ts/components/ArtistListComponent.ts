@@ -54,6 +54,7 @@ class ArtistView{
         </artist-view>
 
       </div>
+     <div><button (click)='playSample()'>play</button></div>
     </div>
   `
 })
@@ -64,5 +65,10 @@ export class ArtistList {
     this.artists =  this.artistsService.artistList;
   }
 
+
+  playSample(event:any):void{
+    this.artistsService.playBuffer();
+    event.preventDefault();
+  }
 
 }

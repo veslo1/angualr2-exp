@@ -14,6 +14,15 @@ interface IArtistsOperation extends Function {
 
 @Injectable()
 export class ArtistService {
+
+    private audioContext: AudioContext;
+    private audioBuffer: AudioBuffer;
+    private playbackRate: number = 1.0;
+    private gain: number = 1.0;
+
+    query: string;
+    results: Object;
+
     draftBinaryData= new BinaryData();
     // a stream that publishes new messages only once
     newArtists: Subject<Artist> = new Subject<Artist>();
@@ -34,6 +43,8 @@ export class ArtistService {
 
 
     constructor(public binaryLoadService:BinaryLoadService) {
+
+        this.audioContext = new AudioContext();
         this.artistList = this.updates
             // watch the updates and accumulate operations on the messages
             .scan((artistList: Artist[],
@@ -66,11 +77,40 @@ export class ArtistService {
     }
 
     setCurrentArtist(artistRequest): void{
-        console.log('artistRequest', artistRequest);
         let bd: BinaryData = this.draftBinaryData;
         bd.artist = artistRequest;
+        console.log('bd.artist.trackURL ='+bd.artist.trackURL);
+        this.query = bd.artist.trackURL;
+        this.binaryLoadService
+            .getTrack(this.query)
+            .subscribe(( res:any) => this.renderResults(res));
     }
 
+    renderResults(res): void {
+        var ref = this;
+        this.audioContext.decodeAudioData( res, function(buffer){
+        ref.audioBuffer = buffer;
+        console.log("this.gain ="+ref.gain)
+        console.log("this.audioBuffer.length ="+ref.audioBuffer.length);
+        console.log("this.audioBuffer.duration ="+ref.audioBuffer.duration);
+        })
+    }
+
+    playBuffer(): void {
+        let bufferSource = this.audioContext.createBufferSource();
+        console.log("this.audioBuffer.length ="+this.audioBuffer.length);
+        console.log("this.audioBuffer.duration ="+this.audioBuffer.duration);
+        bufferSource.buffer = this.audioBuffer;
+        bufferSource.playbackRate.value = this.playbackRate;
+
+        let gainNode = this.audioContext.createGain();
+        gainNode.gain.value = this.gain;
+
+        bufferSource.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        bufferSource.start(0);
+    }
 }
 
 export var artistServiceInjectables: Array<any> = [
