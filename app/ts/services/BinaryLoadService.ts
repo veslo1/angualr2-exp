@@ -9,8 +9,7 @@ import 'rxjs/Rx';
 export class BinaryLoadService {
 
 
-  constructor(public http: Http) {
-  }
+  constructor(public http: Http) {}
 
   query(URL:string): Observable<any[]> {
 

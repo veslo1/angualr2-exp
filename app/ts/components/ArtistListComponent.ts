@@ -34,6 +34,7 @@ class ArtistView{
   constructor(public artistsService: ArtistService) {
   }
   clicked(event: any): void {
+    console.log('clicked =',event);
     this.artistsService.setCurrentArtist(this.artist);
     event.preventDefault();
   }
@@ -54,8 +55,10 @@ class ArtistView{
         </artist-view>
 
       </div>
-     <div><button (click)='playSample()'>play</button></div>
-    </div>
+     </div>
+     <br>
+     <br>
+     <div class="row"><button (click)='playSample($event)'>play</button></div>
   `
 })
 export class ArtistList {
@@ -67,6 +70,7 @@ export class ArtistList {
 
 
   playSample(event:any):void{
+    console.log('playSample =',event);
     this.artistsService.playBuffer();
     event.preventDefault();
   }
